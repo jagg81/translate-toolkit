@@ -100,9 +100,9 @@ class csv2po:
 
     def handlecsvunit(self, csvunit):
         """handles reintegrating a csv unit into the .po file"""
-        if len(csvunit.location.strip()) > 0 and csvunit.location in self.commentindex:
-            pounit = self.commentindex[csvunit.location]
-        elif csvunit.source in self.sourceindex:
+        #if len(csvunit.location.strip()) > 0 and csvunit.location in self.commentindex:
+            #pounit = self.commentindex[csvunit.location]
+        if csvunit.source in self.sourceindex:
             pounit = self.sourceindex[csvunit.source]
         elif simplify(csvunit.source) in self.simpleindex:
             thepolist = self.simpleindex[simplify(csvunit.source)]
@@ -120,16 +120,23 @@ class csv2po:
             return
         if pounit.hasplural():
             # we need to work out whether we matched the singular or the plural
-            singularid = pounit.source.strings[0]
-            pluralid = pounit.source.strings[1]
-            if csvunit.source == singularid:
-                pounit.msgstr[0] = csvunit.target
-            elif csvunit.source == pluralid:
-                pounit.msgstr[1] = csvunit.target
-            elif simplify(csvunit.source) == simplify(singularid):
-                pounit.msgstr[0] = csvunit.target
-            elif simplify(csvunit.source) == simplify(pluralid):
-                pounit.msgstr[1] = csvunit.target
+            if len(csvunit.location.strip()) > 0 and csvunit.location:
+                location = int(csvunit.location)
+                pounit.msgstr[location][0] = quotecsvstr(csvunit.target)
+            #singularid = pounit.source.strings[0]
+            #pluralid = pounit.source.strings[1]
+            #if not csvunit.location:
+                #pounit.msgstr[0][0] = quotecsvstr(csvunit.target)
+            #elif len(csvunit.location.strip()) > 0 and csvunit.location:
+                #location = int(csvunit.location)
+                #pounit.msgstr[location][0] = quotecsvstr(csvunit.target)
+            ##elif csvunit.source == pluralid:
+                ##location = csvunit.location
+                ##pounit.msgstr[location] = csvunit.target
+            ##elif simplify(csvunit.source) == simplify(singularid):
+                ##pounit.msgstr[0] = csvunit.target
+            ##elif simplify(csvunit.source) == simplify(pluralid):
+                ##pounit.msgstr[1] = csvunit.target
             else:
                 print >> sys.stderr, "couldn't work out singular or plural: %r, %r, %r" %  \
                     (csvunit.source, singularid, pluralid)

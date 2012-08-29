@@ -44,7 +44,8 @@ class po2csv:
         elif inputunit.isblank():
             return None
         else:
-            csvunit.location = self.convertcomments(inputunit)
+            #csvunit.location = self.convertcomments(inputunit)
+            csvunit.location = str(0)
             csvunit.source = inputunit.source
             csvunit.target = inputunit.target
         return csvunit
@@ -56,13 +57,19 @@ class po2csv:
         plurals are not handled.  For single plural languages we simply 
         skip this plural extraction.
         """
-        if len(inputunit.target.strings) == 1:  # No plural forms
-            return None
-        csvunit = csvl10n.csvunit()
-        csvunit.location = self.convertcomments(inputunit)
-        csvunit.source = inputunit.source.strings[1]
-        csvunit.target = inputunit.target.strings[1]
-        return csvunit
+        #if len(inputunit.target.strings) == 1:  # No plural forms
+            #return None
+        source = inputunit.source.strings[0]
+        plural_strings = inputunit.target.strings[1:]
+        csvunits = []
+        for index, target in enumerate(plural_strings):
+            csvunit = csvl10n.csvunit()
+            #csvunit.location = self.convertcomments(inputunit)
+            csvunit.location = str(index+1)
+            csvunit.source = source
+            csvunit.target = target
+            csvunits.append(csvunit)
+        return csvunits
 
     def convertstore(self, inputstore, columnorder=None):
         if columnorder is None:
@@ -73,9 +80,10 @@ class po2csv:
             if outputunit is not None:
                 outputstore.addunit(outputunit)
             if inputunit.hasplural():
-                outputunit = self.convertplurals(inputunit)
-                if outputunit is not None:
-                    outputstore.addunit(outputunit)
+                plural_csvunits = self.convertplurals(inputunit)
+                for outputunit in plural_csvunits:
+                    if outputunit is not None:
+                        outputstore.addunit(outputunit)
         return outputstore
 
 
